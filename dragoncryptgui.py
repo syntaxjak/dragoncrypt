@@ -34,7 +34,7 @@ def decrypt_file():
         return
 
     output_file_path = filedialog.asksaveasfilename(defaultextension=".png",
-                                                    filetypes=[("PNG files", "*.png"), ("All files", "*.*")])
+                                                    filetypes=[("All files", "*.*"), ("PNG files", "*.png")])
     if not output_file_path:
         return
     
