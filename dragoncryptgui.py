@@ -1,16 +1,15 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox, simpledialog
+from tkinter import filedialog, messagebox
 import dragoncrypt
-import os
 
 def encrypt_file():
-    file_path = filedialog.askopenfilename()
-    if not file_path:
-        return
-
-    keyword = simpledialog.askstring("Keyword", "Enter the encryption keyword:")
+    keyword = password_entry.get()
     if not keyword:
-        messagebox.showwarning("Warning", "No keyword provided.")
+        messagebox.showwarning("Warning", "Please enter a password (keyword).")
+        return
+    
+    file_path = filedialog.askopenfilename(filetypes=[("All files", "*.*")])
+    if not file_path:
         return
 
     output_file_path = filedialog.asksaveasfilename(defaultextension=".bin",
@@ -24,18 +23,17 @@ def encrypt_file():
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
-
 def decrypt_file():
+    keyword = password_entry.get()
+    if not keyword:
+        messagebox.showwarning("Warning", "Please enter a password (keyword).")
+        return
+    
     file_path = filedialog.askopenfilename(filetypes=[("Binary files", "*.bin"), ("All files", "*.*")])
     if not file_path:
         return
 
-    keyword = simpledialog.askstring("Keyword", "Enter the decryption keyword:")
-    if not keyword:
-        messagebox.showwarning("Warning", "No keyword provided.")
-        return
-
-    output_file_path = filedialog.asksaveasfilename(defaultextension="All files",
+    output_file_path = filedialog.asksaveasfilename(defaultextension=".png",
                                                     filetypes=[("PNG files", "*.png"), ("All files", "*.*")])
     if not output_file_path:
         return
@@ -46,9 +44,14 @@ def decrypt_file():
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
-
 root = tk.Tk()
 root.title('DragonCrypt')
+
+password_label = tk.Label(root, text="Password:")
+password_label.pack()
+
+password_entry = tk.Entry(root, show="*")  # The show="*" ensures that the password is masked
+password_entry.pack()
 
 encrypt_button = tk.Button(root, text='Encrypt File', command=encrypt_file)
 encrypt_button.pack()
