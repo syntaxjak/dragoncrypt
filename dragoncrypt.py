@@ -110,11 +110,11 @@ def decrypt_file(input_file_path, output_file_path, keyword):
     print(f"File decrypted successfully as '{output_file_path}'")
 
 # Example usage for encryption and decryption
-file_path_to_encrypt = "/home/killswitch/testfile.txt"
-output_encrypted_file_path = "/home/killswitch/testfile.bin"
-encryption_keyword = "SECRETKEY"
-encrypt_file(file_path_to_encrypt, output_encrypted_file_path, encryption_keyword)
+#file_path_to_encrypt = "/home/killswitch/testfile.txt"
+#output_encrypted_file_path = "/home/killswitch/testfile.bin"
+#encryption_keyword = "SECRETKEY"
+#encrypt_file(file_path_to_encrypt, output_encrypted_file_path, encryption_keyword)
 
-input_encrypted_file_path = output_encrypted_file_path
-output_decrypted_file_path = "/home/killswitch/testfile.decrypted.txt"
-decrypt_file(input_encrypted_file_path, output_decrypted_file_path, encryption_keyword)
+#input_encrypted_file_path = output_encrypted_file_path
+#output_decrypted_file_path = "/home/killswitch/testfile.decrypted.txt"
+#decrypt_file(input_encrypted_file_path, output_decrypted_file_path, encryption_keyword)
