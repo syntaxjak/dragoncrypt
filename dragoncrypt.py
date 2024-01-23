@@ -22,6 +22,20 @@ def encrypt_bytes_with_pattern(data_bytes, pattern, substitution_map_cache):
         result.append(new_byte)
     return bytes(result)
 
+# Function to expand a keyword using parameters derived from itself
+def lengthen_keyword(keyword, desired_length):
+    expanded_keyword = keyword
+    while len(expanded_keyword) < desired_length:
+        # Take the last character for transformation to avoid influence from ONLY initial keyword
+        last_char = expanded_keyword[-1]
+        # Calculate parameters based on the full range of byte values
+        multiplier = ord(last_char) % 10 + 1
+        adder = ord(last_char) * ord(last_char) % 256
+        new_char_value = (ord(last_char) * multiplier + adder) % 256
+        expanded_keyword += chr(new_char_value)
+    expanded_keyword = expanded_keyword[:desired_length]
+    return expanded_keyword
+
 # Functions to apply and reverse Vigenère cipher for numbers in the pattern
 def vigenere_cipher_for_numbers(pattern, keyword):
     keyword_numbers = [(ord(char) - ord('A')) for char in keyword.upper()]
@@ -54,14 +68,15 @@ def save_encrypted_data_and_pattern(encrypted_data, encrypted_pattern, output_fi
 
 # Main function to encrypt file
 def encrypt_file(file_path, output_file_path, keyword):
+    expanded_keyword = lengthen_keyword(keyword, 256)  # Use expanded keyword
     file_bytes = read_file_as_bytes(file_path)
     file_pattern = generate_random_pattern(len(file_bytes), 255)
     byte_substitution_map_cache = cache_substitution_maps(256, False)
     encrypted_file_bytes = encrypt_bytes_with_pattern(file_bytes, file_pattern, byte_substitution_map_cache)
-    vigenere_encrypted_pattern = vigenere_cipher_for_numbers(file_pattern, keyword)
+    vigenere_encrypted_pattern = vigenere_cipher_for_numbers(file_pattern, expanded_keyword)  # Use expanded keyword
     save_encrypted_data_and_pattern(encrypted_file_bytes, vigenere_encrypted_pattern, output_file_path)
     print(f"File '{file_path}' encrypted successfully as '{output_file_path}'")
-    print(f"Keyword needed for decryption: {keyword}")
+    print(f"Keyword needed for decryption: {keyword}")  # Keep original keyword for user
 
 # Function to decrypt bytes data using a pattern and caches
 def decrypt_bytes_with_pattern(encrypted_data_bytes, decrypted_pattern, substitution_map_cache):
@@ -83,10 +98,11 @@ def load_encrypted_data_and_pattern(input_file_path):
         encrypted_data = file.read()
     return encrypted_data, encrypted_pattern
 
-# Function to decrypt file using keyword
+# Function to decrypt file using expanded keyword
 def decrypt_file(input_file_path, output_file_path, keyword):
+    expanded_keyword = lengthen_keyword(keyword, 256)  # Use expanded keyword
     encrypted_data, vigenere_encrypted_pattern = load_encrypted_data_and_pattern(input_file_path)
-    decrypted_pattern = inv_vigenere_cipher_for_numbers(vigenere_encrypted_pattern, keyword)
+    decrypted_pattern = inv_vigenere_cipher_for_numbers(vigenere_encrypted_pattern, expanded_keyword)  # Use expanded keyword
     byte_substitution_map_cache = cache_substitution_maps(256, False)
     decrypted_data = decrypt_bytes_with_pattern(encrypted_data, decrypted_pattern, byte_substitution_map_cache)
     with open(output_file_path, 'wb') as file:
@@ -94,11 +110,11 @@ def decrypt_file(input_file_path, output_file_path, keyword):
     print(f"File decrypted successfully as '{output_file_path}'")
 
 # Example usage for encryption and decryption
-#file_path_to_encrypt = "/home/killswitch/testpic.png"
-#output_encrypted_file_path = "/home/killswitch/testpic.bin"
-#encryption_keyword = "SECRETKEY"
-#encrypt_file(file_path_to_encrypt, output_encrypted_file_path, encryption_keyword)
+file_path_to_encrypt = "/home/killswitch/testfile.txt"
+output_encrypted_file_path = "/home/killswitch/testfile.bin"
+encryption_keyword = "SECRETKEY"
+encrypt_file(file_path_to_encrypt, output_encrypted_file_path, encryption_keyword)
 
-#input_encrypted_file_path = output_encrypted_file_path
-#output_decrypted_file_path = "/home/killswitch/testpic.decrypted.png"
-#decrypt_file(input_encrypted_file_path, output_decrypted_file_path, encryption_keyword)
+input_encrypted_file_path = output_encrypted_file_path
+output_decrypted_file_path = "/home/killswitch/testfile.decrypted.txt"
+decrypt_file(input_encrypted_file_path, output_decrypted_file_path, encryption_keyword)
