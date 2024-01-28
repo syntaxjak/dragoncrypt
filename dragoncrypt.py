@@ -83,10 +83,6 @@ def save_encrypted_data_and_pattern(encrypted_data, encrypted_pattern, output_fi
 
 # Main function to encrypt file
 def encrypt_file(file_path, output_file_path, keyword):
-    expanded_keyword = lengthen_keyword(keyword, 256)  # Use expanded keyword with shuffle
-    
-# Main function to encrypt file
-def encrypt_file(file_path, output_file_path, keyword):
     expanded_keyword = lengthen_keyword(keyword, 256)  # Use expanded keyword
     shuffle_count = get_shuffle_count_from_keyword(keyword, len(keyword))  # Get shuffle count from the original keyword
     
@@ -161,11 +157,11 @@ def decrypt_file(input_file_path, output_file_path, keyword):
     
 
 # Example usage for encryption and decryption
-#file_path_to_encrypt = "/home/killswitch/testfile.txt"
-#output_encrypted_file_path = "/home/killswitch/testfile.bin"
-#encryption_keyword = "SECRETKEY"
-#encrypt_file(file_path_to_encrypt, output_encrypted_file_path, encryption_keyword)
+file_path_to_encrypt = "/home/killswitch/testfile.txt"
+output_encrypted_file_path = "/home/killswitch/testfile.bin"
+encryption_keyword = "SECRETKEY"
+encrypt_file(file_path_to_encrypt, output_encrypted_file_path, encryption_keyword)
 
-#input_encrypted_file_path = output_encrypted_file_path
-#output_decrypted_file_path = "/home/killswitch/testfile.decrypted.txt"
-#decrypt_file(input_encrypted_file_path, output_decrypted_file_path, encryption_keyword)
+input_encrypted_file_path = output_encrypted_file_path
+output_decrypted_file_path = "/home/killswitch/testfile.decrypted.txt"
+decrypt_file(input_encrypted_file_path, output_decrypted_file_path, encryption_keyword)
