@@ -1,6 +1,22 @@
 import secrets
 import os
 
+# Function to perform a perfect shuffle
+def perfect_shuffle(deck):
+    mid = (len(deck) + 1) // 2
+    return [deck[i // 2] if i % 2 == 0 else deck[i // 2 + mid] for i in range(len(deck))]
+
+# Define a corrected unshuffle function
+def unshuffle(deck):
+    unshuffled_deck = [None] * len(deck)
+    mid = len(deck) // 2
+    unshuffled_deck[:mid] = deck[::2]
+    unshuffled_deck[mid:] = deck[1::2]
+    return unshuffled_deck
+
+def get_shuffle_count_from_keyword(keyword, pattern_length):
+    return sum(ord(char) for char in keyword.lower()) % pattern_length
+
 # Function to generate a random non-repeating pattern for encryption/decryption
 def generate_random_pattern(length, max_shift):
     return [secrets.randbelow(max_shift) + 1 for _ in range(length)]
@@ -26,15 +42,14 @@ def encrypt_bytes_with_pattern(data_bytes, pattern, substitution_map_cache):
 def lengthen_keyword(keyword, desired_length):
     expanded_keyword = keyword
     while len(expanded_keyword) < desired_length:
-        # Take the last character for transformation to avoid influence from ONLY initial keyword
+        # Take the last character for transformation
         last_char = expanded_keyword[-1]
         # Calculate parameters based on the full range of byte values
         multiplier = ord(last_char) % 10 + 1
         adder = ord(last_char) * ord(last_char) % 256
         new_char_value = (ord(last_char) * multiplier + adder) % 256
         expanded_keyword += chr(new_char_value)
-    expanded_keyword = expanded_keyword[:desired_length]
-    return expanded_keyword
+    return expanded_keyword[:desired_length]
 
 # Functions to apply and reverse Vigenère cipher for numbers in the pattern
 def vigenere_cipher_for_numbers(pattern, keyword):
@@ -68,12 +83,26 @@ def save_encrypted_data_and_pattern(encrypted_data, encrypted_pattern, output_fi
 
 # Main function to encrypt file
 def encrypt_file(file_path, output_file_path, keyword):
+    expanded_keyword = lengthen_keyword(keyword, 256)  # Use expanded keyword with shuffle
+    
+# Main function to encrypt file
+def encrypt_file(file_path, output_file_path, keyword):
     expanded_keyword = lengthen_keyword(keyword, 256)  # Use expanded keyword
+    shuffle_count = get_shuffle_count_from_keyword(keyword, len(keyword))  # Get shuffle count from the original keyword
+    
+    shuffled_keyword_list = list(expanded_keyword)
+    for _ in range(shuffle_count):
+        shuffled_keyword_list = perfect_shuffle(shuffled_keyword_list)
+    shuffled_keyword = ''.join(shuffled_keyword_list)
+    
     file_bytes = read_file_as_bytes(file_path)
     file_pattern = generate_random_pattern(len(file_bytes), 255)
     byte_substitution_map_cache = cache_substitution_maps(256, False)
     encrypted_file_bytes = encrypt_bytes_with_pattern(file_bytes, file_pattern, byte_substitution_map_cache)
-    vigenere_encrypted_pattern = vigenere_cipher_for_numbers(file_pattern, expanded_keyword)  # Use expanded keyword
+    
+    # Use shuffled keyword for the Vigenère cipher on the pattern
+    vigenere_encrypted_pattern = vigenere_cipher_for_numbers(file_pattern, shuffled_keyword)
+    
     save_encrypted_data_and_pattern(encrypted_file_bytes, vigenere_encrypted_pattern, output_file_path)
     print(f"File '{file_path}' encrypted successfully as '{output_file_path}'")
     print(f"Keyword needed for decryption: {keyword}")  # Keep original keyword for user
@@ -100,14 +129,36 @@ def load_encrypted_data_and_pattern(input_file_path):
 
 # Function to decrypt file using expanded keyword
 def decrypt_file(input_file_path, output_file_path, keyword):
-    expanded_keyword = lengthen_keyword(keyword, 256)  # Use expanded keyword
+    shuffle_count = get_shuffle_count_from_keyword(keyword, len(keyword))  # Get shuffle count from the original keyword
+    expanded_keyword = lengthen_keyword(keyword, 256)  # Expand keyword first, without shuffling
+    
+    # Load the vigenere_encrypted_pattern before unshuffling the expanded keyword
     encrypted_data, vigenere_encrypted_pattern = load_encrypted_data_and_pattern(input_file_path)
-    decrypted_pattern = inv_vigenere_cipher_for_numbers(vigenere_encrypted_pattern, expanded_keyword)  # Use expanded keyword
+    
+    # Apply inverse Vigenère cipher on the encrypted pattern using the shuffled keyword
+    shuffled_keyword_list = list(expanded_keyword)
+    for _ in range(shuffle_count):
+        shuffled_keyword_list = perfect_shuffle(shuffled_keyword_list)  # Shuffle the keyword for decryption
+    shuffled_keyword = ''.join(shuffled_keyword_list)
+    
+    decrypted_pattern = inv_vigenere_cipher_for_numbers(vigenere_encrypted_pattern, shuffled_keyword)
+    
+    # After the encrypted pattern is converted, unshuffle the expanded keyword for further decryption
+    for _ in range(shuffle_count):
+        shuffled_keyword_list = unshuffle(shuffled_keyword_list)
+    unshuffled_keyword = ''.join(shuffled_keyword_list)
+    
     byte_substitution_map_cache = cache_substitution_maps(256, False)
+    
+    # Use the decrypted pattern to decrypt the data
     decrypted_data = decrypt_bytes_with_pattern(encrypted_data, decrypted_pattern, byte_substitution_map_cache)
+    
+    # Save the decrypted data
     with open(output_file_path, 'wb') as file:
         file.write(decrypted_data)
+    
     print(f"File decrypted successfully as '{output_file_path}'")
+    
 
 # Example usage for encryption and decryption
 #file_path_to_encrypt = "/home/killswitch/testfile.txt"
