@@ -58,7 +58,7 @@ def lengthen_keyword(keyword, desired_length):
         expanded_keyword += chr(new_char_value)
     return expanded_keyword[:desired_length]
     
-# Functions to apply and reverse Vigenère cipher for numbers in the pattern
+# Functions to apply the Vigenère cipher for numbers in the pattern
 def vigenere_cipher_for_numbers(pattern, keyword):
     keyword_numbers = [(ord(char) - ord('A')) for char in keyword.upper()]
     keyword_length = len(keyword_numbers)
@@ -66,6 +66,7 @@ def vigenere_cipher_for_numbers(pattern, keyword):
     vigenere_pattern = [(shift + keyword_numbers[i % keyword_length]) % max_shift for i, shift in enumerate(pattern)]
     return vigenere_pattern
 
+# Functions to reverse the Vigenère cipher for numbers in the pattern
 def inv_vigenere_cipher_for_numbers(pattern, keyword):
     keyword_numbers = [(ord(char) - ord('A')) for char in keyword.upper()]
     keyword_length = len(keyword_numbers)
