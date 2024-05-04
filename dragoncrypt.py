@@ -1,4 +1,3 @@
-import secrets
 import os
 
 # Function to perform a perfect shuffle
@@ -17,9 +16,17 @@ def unshuffle(deck):
 def get_shuffle_count_from_keyword(keyword, pattern_length):
     return sum(ord(char) for char in keyword.lower()) % pattern_length
 
-# Function to generate a random non-repeating pattern for encryption/decryption
+# Function to generate a random pattern for encryption/decryption using /dev/random
 def generate_random_pattern(length, max_shift):
-    return [secrets.randbelow(max_shift) + 1 for _ in range(length)]
+    pattern = []
+    with open("/dev/random", "rb") as f:
+        for _ in range(length):
+            # Read just enough bytes to cover max_shift
+            num_bytes = (max_shift.bit_length() + 7) // 8
+            random_bytes = f.read(num_bytes)
+            random_int = int.from_bytes(random_bytes, byteorder='big') % max_shift + 1
+            pattern.append(random_int)
+    return pattern
 
 # Cache substitution maps for all possible shifts for bytes
 def cache_substitution_maps(max_shift, is_letter_map=False):
@@ -38,19 +45,19 @@ def encrypt_bytes_with_pattern(data_bytes, pattern, substitution_map_cache):
         result.append(new_byte)
     return bytes(result)
 
-# Function to expand a keyword using parameters derived from itself
+ # Function to expand a keyword using parameters derived from itself   
 def lengthen_keyword(keyword, desired_length):
     expanded_keyword = keyword
     while len(expanded_keyword) < desired_length:
-        # Take the last character for transformation
+        state = sum(ord(c) for c in expanded_keyword)  # Simple cumulative state
         last_char = expanded_keyword[-1]
-        # Calculate parameters based on the full range of byte values
-        multiplier = ord(last_char) % 10 + 1
-        adder = ord(last_char) * ord(last_char) % 256
-        new_char_value = (ord(last_char) * multiplier + adder) % 256
+        # Calculate parameters potentially more influenced by cumulative state
+        multiplier = (ord(last_char) + state) % 10 + 1
+        adder = (ord(last_char) + state) * (ord(last_char) + state) % 256
+        new_char_value = (ord(last_char) * multiplier + adder + state) % 256
         expanded_keyword += chr(new_char_value)
     return expanded_keyword[:desired_length]
-
+    
 # Functions to apply and reverse Vigenère cipher for numbers in the pattern
 def vigenere_cipher_for_numbers(pattern, keyword):
     keyword_numbers = [(ord(char) - ord('A')) for char in keyword.upper()]
