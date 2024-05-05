@@ -45,18 +45,29 @@ def encrypt_bytes_with_pattern(data_bytes, pattern, substitution_map_cache):
         result.append(new_byte)
     return bytes(result)
 
- # Function to expand a keyword using parameters derived from itself   
 def lengthen_keyword(keyword, desired_length):
     expanded_keyword = keyword
+    kw_length = len(keyword)
+    state = sum(ord(c) for c in expanded_keyword)
+    exponent = 1  # Starting exponent
+    trapdoor_factor = sum(ord(c) ^ exponent for c in keyword) % 256  # Trapdoor factor derived from the keyword
     while len(expanded_keyword) < desired_length:
-        state = sum(ord(c) for c in expanded_keyword)  # Simple cumulative state
-        last_char = expanded_keyword[-1]
-        # Calculate parameters potentially more influenced by cumulative state
-        multiplier = (ord(last_char) + state) % 10 + 1
-        adder = (ord(last_char) + state) * (ord(last_char) + state) % 256
-        new_char_value = (ord(last_char) * multiplier + adder + state) % 256
+        index = len(expanded_keyword) % kw_length
+        current_char = expanded_keyword[index]
+        base_value = ord(current_char)
+        # Calculate new state as in original function
+        state = (state + ord(expanded_keyword[-1])) % 256
+        # Apply original calculation with new added exponentiation
+        multiplier = (base_value + state) % 10 + 1
+        adder = (base_value + state) ** exponent % 256  # Using exponentiation here
+        new_char_value = (base_value * multiplier + adder + state) % 256
+        # Apply the trapdoor factor
+        if base_value % 17 == 0:  # This is arbitrary, for the sake of example
+            new_char_value = (new_char_value * trapdoor_factor) % 256
         expanded_keyword += chr(new_char_value)
-    return expanded_keyword[:desired_length]
+        # Increment the exponent and wrap it at 256 to avoid excessively large numbers
+        exponent = (exponent + 1) % 256
+    return expanded_keyword[:desired_length]    
     
 # Functions to apply the Vigenère cipher for numbers in the pattern
 def vigenere_cipher_for_numbers(pattern, keyword):
