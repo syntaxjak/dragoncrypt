@@ -74,7 +74,7 @@ root.geometry('400x350')  # Adjusted size as we have fewer widgets
 
 
 # Use 'bg' property to match the canvas color or use 'systemTransparent' for transparency
-transparent_color = 'black'
+transparent_color = 'orangered4'
 
 # Use a canvas to add a background image
 canvas = tk.Canvas(root, width=400, height=400)
