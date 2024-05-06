@@ -21,12 +21,12 @@ def encrypt_file():
         return
     
     # Check if the file already has the .drgenc extension
-    if file_path.lower().endswith('.drgenc'):
+    if file_path.lower().endswith('.molten'):
         messagebox.showwarning("Error", "The selected file is already encrypted.")
         return
 
     # Proceed with encryption as the file is not already encrypted
-    output_file_path = file_path + '.drgenc'
+    output_file_path = file_path + '.moltenc'
     
     try:
         dragoncrypt.encrypt_file(file_path, output_file_path, keyword)
@@ -47,8 +47,8 @@ def decrypt_file():
         return
     
     # Check if the file has the .drgenc extension and remove only that extension
-    if file_path.lower().endswith('.drgenc'):
-        output_file_path = file_path[:-len('.drgenc')]
+    if file_path.lower().endswith('.moltenc'):
+        output_file_path = file_path[:-len('.moltenc')]
     else:
         messagebox.showwarning("Warning", "The selected file does not have the .drgenc extension")
         return
