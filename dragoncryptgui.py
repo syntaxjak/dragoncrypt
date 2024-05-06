@@ -21,7 +21,7 @@ def encrypt_file():
         return
     
     # Check if the file already has the .drgenc extension
-    if file_path.lower().endswith('.molten'):
+    if file_path.lower().endswith('.moltenc'):
         messagebox.showwarning("Error", "The selected file is already encrypted.")
         return
 
@@ -50,7 +50,7 @@ def decrypt_file():
     if file_path.lower().endswith('.moltenc'):
         output_file_path = file_path[:-len('.moltenc')]
     else:
-        messagebox.showwarning("Warning", "The selected file does not have the .drgenc extension")
+        messagebox.showwarning("Warning", "The selected file does not have the .moltenc extension")
         return
     
     try:
