@@ -80,7 +80,7 @@ transparent_color = 'orangered4'
 canvas = tk.Canvas(root, width=400, height=400)
 canvas.pack(fill="both", expand=True)
 # Load an image file you have for the texture
-bg_image = tk.PhotoImage(file="/home/killswitch/dragoncrypt/dragonscrypt.png")
+bg_image = tk.PhotoImage(file="dragonscrypt.png")
 canvas.create_image(0, 0, image=bg_image, anchor="nw")
 
 # Use Entries to show the selected file path
